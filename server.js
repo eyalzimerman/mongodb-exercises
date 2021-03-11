@@ -66,7 +66,11 @@ app.post("/api/exercise/add", async (req, res) => {
 });
 
 app.get("/api/exercise/users", (req, res) => {
-  res.json({ name: "erererer" });
+  User.find({})
+    .select("-__v")
+    .then((users) => {
+      res.json(users);
+    });
 });
 
 app.get("/api/exercise/log", (req, res) => {
