@@ -14,10 +14,18 @@ mongoose
   });
 
 const exerciseSchema = new mongoose.Schema({
-  userId: { type: Number, required: true },
+  username: { type: String },
+  userId: { type: String, required: true },
   description: { type: String, required: true },
   duration: { type: Number, required: true },
   date: { type: Date, default: new Date() },
+});
+
+exerciseSchema.set("toJSON", {
+  transform: (document, returnedObject) => {
+    delete returnedObject._id;
+    delete returnedObject.__v;
+  },
 });
 
 module.exports = mongoose.model("Exercise", exerciseSchema);

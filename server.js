@@ -31,9 +31,38 @@ app.post("/api/exercise/new-user", async (req, res) => {
   }
 });
 
-app.post("/api/exercise/add", (req, res) => {
-  const { userId, description, duration, date } = req.body;
-  res.json({ name: "golololo" });
+app.post("/api/exercise/add", async (req, res) => {
+  const { userId, description, duration } = req.body;
+
+  const date = req.body.date === "" ? undefined : new Date(req.body.date);
+
+  try {
+    const findUser = await User.findById(userId);
+
+    const exercise = new Exercise({
+      userId: findUser._id,
+      username: findUser.username,
+      description: description,
+      duration: duration,
+      date: date,
+    });
+
+    const savedExercise = await exercise.save();
+    const newExercise = {
+      username: savedExercise.username,
+      description: savedExercise.description,
+      duration: savedExercise.duration,
+      date: savedExercise.date,
+      _id: savedExercise.userId,
+    };
+
+    return res.status(200).json(newExercise);
+  } catch (error) {
+    if (error.name === "ValidationError") {
+      return res.status(400).json({ message: error.message });
+    }
+    return res.status(500).send({ error: "Problems with our server" });
+  }
 });
 
 app.get("/api/exercise/users", (req, res) => {
