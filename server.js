@@ -1,19 +1,23 @@
+require("dotenv").config();
 const express = require("express");
 const app = express();
 const cors = require("cors");
-require("dotenv").config();
 
 app.use(cors());
+app.use(express.json());
 app.use(express.static("public"));
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/views/index.html");
 });
 
 app.post("/api/exercise/new-user", (req, res) => {
+  const { username } = req.body;
+
   res.json({ name: "fuckall" });
 });
 
 app.post("/api/exercise/add", (req, res) => {
+  const { userId, description, duration, date } = req.body;
   res.json({ name: "golololo" });
 });
 
