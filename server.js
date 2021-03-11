@@ -53,7 +53,7 @@ app.post("/api/exercise/add", async (req, res) => {
       description: savedExercise.description,
       duration: savedExercise.duration,
       date: savedExercise.date,
-      _id: savedExercise.userId,
+      _id: formatDate(savedExercise.userId),
     };
 
     return res.status(200).json(newExercise);
@@ -73,9 +73,60 @@ app.get("/api/exercise/users", (req, res) => {
     });
 });
 
-app.get("/api/exercise/log", (req, res) => {
-  res.json({ name: "as;dklsa;ldkweotijo" });
+app.get("/api/exercise/log?:userId", async (req, res) => {
+  const id = req.query.userId;
+
+  try {
+    const user = await User.findById(id);
+
+    if (!user) {
+      return res.status(404).send("Unknown userId");
+    }
+
+    const { _id, username } = user;
+    const log = await Exercise.find({ userId: _id }).select(
+      "-userId -__v -username -_id"
+    );
+
+    const newLog = [];
+
+    log.forEach(({ duration, date, description }) => {
+      const exerciseUpdate = {
+        description,
+        duration,
+        date: formatDate(date),
+      };
+      newLog.push(exerciseUpdate);
+    });
+
+    const count = log.length;
+
+    const userLog = {
+      _id,
+      username,
+      count,
+      log: newLog,
+    };
+    return res.status(200).json(userLog);
+  } catch (error) {
+    if (error.name === "CastError") {
+      return res.status(400).json({ message: error.message });
+    }
+    return res.status(500).send({ error: "Problems with our server" });
+  }
 });
+
+function formatDate(date) {
+  const year = date.getFullYear();
+  const day = date.getDay();
+  const month = new Intl.DateTimeFormat("en-US", { month: "short" }).format(
+    date
+  );
+  const weekday = new Intl.DateTimeFormat("en-US", { weekday: "short" }).format(
+    date
+  );
+  return `${weekday} ${month} ${day} ${year}`;
+}
 
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log("Your app is listening on port " + listener.address().port);
