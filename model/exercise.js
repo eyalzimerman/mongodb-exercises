@@ -1,4 +1,5 @@
 require("dotenv").config();
+const { ObjectID } = require("bson");
 const mongoose = require("mongoose");
 const url = process.env.MONGODB_URI;
 
@@ -15,7 +16,7 @@ mongoose
 
 const exerciseSchema = new mongoose.Schema({
   username: { type: String },
-  userId: { type: String, required: true },
+  userId: { type: mongoose.Types.ObjectId, required: true },
   description: { type: String, required: true },
   duration: { type: Number, required: true },
   date: { type: Date, default: new Date() },
