@@ -53,8 +53,8 @@ app.post("/api/exercise/add", async (req, res) => {
       username: savedExercise.username,
       description: savedExercise.description,
       duration: savedExercise.duration,
-      date: savedExercise.date,
-      _id: formatDate(savedExercise.userId),
+      date: savedExercise.date.toDateString(),
+      _id: savedExercise.userId,
     };
 
     return res.status(200).json(newExercise);
@@ -76,6 +76,8 @@ app.get("/api/exercise/users", (req, res) => {
 
 app.get("/api/exercise/log?:userId?:from?:to?:limit", async (req, res) => {
   const id = req.query.userId;
+  const from = req.query.from;
+  const to = req.query.to;
   const limit = Number(req.query.limit);
   try {
     const user = await User.findById(id);
@@ -93,7 +95,7 @@ app.get("/api/exercise/log?:userId?:from?:to?:limit", async (req, res) => {
       const exerciseUpdate = {
         description,
         duration,
-        date: formatDate(date),
+        date: date.toDateString(),
       };
       newLog.push(exerciseUpdate);
     });
@@ -114,18 +116,6 @@ app.get("/api/exercise/log?:userId?:from?:to?:limit", async (req, res) => {
     return res.status(500).send({ error: "Problems with our server" });
   }
 });
-
-function formatDate(date) {
-  const year = date.getFullYear();
-  const day = date.getDay();
-  const month = new Intl.DateTimeFormat("en-US", { month: "short" }).format(
-    date
-  );
-  const weekday = new Intl.DateTimeFormat("en-US", { weekday: "short" }).format(
-    date
-  );
-  return `${weekday} ${month} ${day} ${year}`;
-}
 
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log("Your app is listening on port " + listener.address().port);
