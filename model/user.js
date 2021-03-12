@@ -17,4 +17,10 @@ const userSchema = new mongoose.Schema({
   username: { type: String, required: true },
 });
 
+exerciseSchema.set("toJSON", {
+  transform: (document, returnedObject) => {
+    delete returnedObject.__v;
+  },
+});
+
 module.exports = mongoose.model("User", userSchema);
