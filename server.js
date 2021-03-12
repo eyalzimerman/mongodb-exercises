@@ -5,6 +5,7 @@ const Exercise = require("./model/exercise");
 const bodyParser = require("body-parser");
 const app = express();
 const cors = require("cors");
+const exercise = require("./model/exercise");
 
 app.use(cors());
 app.use(express.json());
@@ -76,8 +77,8 @@ app.get("/api/exercise/users", (req, res) => {
 
 app.get("/api/exercise/log?:userId?:from?:to?:limit", async (req, res) => {
   const id = req.query.userId;
-  const from = req.query.from;
-  const to = req.query.to;
+  let from = req.query.from;
+  let to = req.query.to;
   const limit = Number(req.query.limit);
   try {
     const user = await User.findById(id);
@@ -89,9 +90,40 @@ app.get("/api/exercise/log?:userId?:from?:to?:limit", async (req, res) => {
     const { _id, username } = user;
     const log = await Exercise.find({ userId: _id }).limit(limit);
 
+    let limitedExercise = [];
+    from = new Date(from);
+    to = new Date(to);
+
+    if (from && to) {
+      console.log("1");
+      log.forEach((exercise) => {
+        if (exercise.date > from && exercise.date < to) {
+          limitedExercise.push(exercise);
+        }
+      });
+    } else if (from && !to) {
+      console.log("2");
+      log.forEach((exercise) => {
+        if (exercise.date > from) {
+          limitedExercise.push(exercise);
+        }
+      });
+    } else if (!from && to) {
+      console.log("3");
+      log.forEach((exercise) => {
+        if (exercise.date < to) {
+          limitedExercise.push(exercise);
+        }
+      });
+    } else {
+      console.log("4");
+      limitedExercise = log;
+      console.log(limitedExercise);
+    }
+
     const newLog = [];
 
-    log.forEach(({ duration, date, description }) => {
+    limitedExercise.forEach(({ duration, date, description }) => {
       const exerciseUpdate = {
         description,
         duration,
@@ -100,7 +132,7 @@ app.get("/api/exercise/log?:userId?:from?:to?:limit", async (req, res) => {
       newLog.push(exerciseUpdate);
     });
 
-    const count = log.length;
+    const count = limitedExercise.length;
 
     const userLog = {
       _id,
