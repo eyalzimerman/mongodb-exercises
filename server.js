@@ -95,28 +95,24 @@ app.get("/api/exercise/log?:userId?:from?:to?:limit", async (req, res) => {
     to = new Date(to);
 
     if (from && to) {
-      console.log("1");
       log.forEach((exercise) => {
         if (exercise.date > from && exercise.date < to) {
           limitedExercise.push(exercise);
         }
       });
     } else if (from && !to) {
-      console.log("2");
       log.forEach((exercise) => {
         if (exercise.date > from) {
           limitedExercise.push(exercise);
         }
       });
     } else if (!from && to) {
-      console.log("3");
       log.forEach((exercise) => {
         if (exercise.date < to) {
           limitedExercise.push(exercise);
         }
       });
     } else {
-      console.log("4");
       limitedExercise = log;
       console.log(limitedExercise);
     }
