@@ -85,9 +85,7 @@ app.get("/api/exercise/log?:userId?:from?:to?:limit", async (req, res) => {
     }
 
     const { _id, username } = user;
-    const log = await Exercise.find({ userId: _id })
-      .limit(limit)
-      .select("-userId -__v -username -_id");
+    const log = await Exercise.find({ userId: _id }).limit(limit);
 
     const newLog = [];
 
