@@ -79,7 +79,7 @@ app.get("/api/exercise/log?:userId?:from?:to?:limit", async (req, res) => {
   const id = req.query.userId;
   let from = req.query.from;
   let to = req.query.to;
-  const limit = Number(req.query.limit);
+  let limit = Number(req.query.limit);
   try {
     const user = await User.findById(id);
 
@@ -88,25 +88,33 @@ app.get("/api/exercise/log?:userId?:from?:to?:limit", async (req, res) => {
     }
 
     const { _id, username } = user;
-    const log = await Exercise.find({ userId: _id }).limit(limit);
+    const log = await Exercise.find({ userId: _id });
 
     let limitedExercise = [];
     from = new Date(from);
     to = new Date(to);
-
-    if (from && to) {
+    if (
+      from.toString() !== "Invalid Date" &&
+      to.toString() !== "Invalid Date"
+    ) {
       log.forEach((exercise) => {
         if (exercise.date > from && exercise.date < to) {
           limitedExercise.push(exercise);
         }
       });
-    } else if (from && !to) {
+    } else if (
+      from.toString() !== "Invalid Date" &&
+      to.toString() === "Invalid Date"
+    ) {
       log.forEach((exercise) => {
         if (exercise.date > from) {
           limitedExercise.push(exercise);
         }
       });
-    } else if (!from && to) {
+    } else if (
+      from.toString() === "Invalid Date" &&
+      to.toString() !== "Invalid Date"
+    ) {
       log.forEach((exercise) => {
         if (exercise.date < to) {
           limitedExercise.push(exercise);
@@ -114,12 +122,18 @@ app.get("/api/exercise/log?:userId?:from?:to?:limit", async (req, res) => {
       });
     } else {
       limitedExercise = log;
-      console.log(limitedExercise);
     }
+
+    if (!limit) {
+      limit = limitedExercise.length;
+    }
+    console.log(limitedExercise);
+    const updateLimitedExercise = limitedExercise.splice(0, limit);
+    console.log(updateLimitedExercise);
 
     const newLog = [];
 
-    limitedExercise.forEach(({ duration, date, description }) => {
+    updateLimitedExercise.forEach(({ duration, date, description }) => {
       const exerciseUpdate = {
         description,
         duration,
