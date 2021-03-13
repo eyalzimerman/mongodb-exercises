@@ -127,9 +127,8 @@ app.get("/api/exercise/log?:userId?:from?:to?:limit", async (req, res) => {
     if (!limit) {
       limit = limitedExercise.length;
     }
-    console.log(limitedExercise);
+
     const updateLimitedExercise = limitedExercise.splice(0, limit);
-    console.log(updateLimitedExercise);
 
     const newLog = [];
 
@@ -142,12 +141,12 @@ app.get("/api/exercise/log?:userId?:from?:to?:limit", async (req, res) => {
       newLog.push(exerciseUpdate);
     });
 
-    const count = limitedExercise.length;
+    const count = updateLimitedExercise.length;
 
     const userLog = {
-      _id,
-      username,
-      count,
+      _id: user.id,
+      username: user.username,
+      count: count,
       log: newLog,
     };
     return res.status(200).json(userLog);
